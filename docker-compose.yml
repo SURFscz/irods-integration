@@ -1,0 +1,57 @@
+version: '2'
+services:
+
+  ldap:
+    build:
+      context: $PWD/ldap
+      dockerfile: Dockerfile
+      args:
+        - LDAP_BASE_DN=${LDAP_BASE_DN}
+    environment:
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_ADMIN_PASSWORD: ${LDAP_PASSWORD}
+      LDAP_TLS: "true"
+      LDAP_TLS_VERIFY_CLIENT: "try"
+      LDAP_TLS_ENFORCE: "false"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - $PWD/var/lib/ldap:/var/lib/ldap
+      - $PWD/etc/ldap/slapd.d:/etc/ldap/slapd.d
+#     - $PWD/etc/ssl/${HOSTNAME}:/container/service/slapd/assets/certs
+#     - /etc/letsencrypt/archive/${HOSTNAME}:/container/service/slapd/assets/certs
+#   restart: never
+    command: "--loglevel trace --copy-service"
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    depends_on:
+      - ldap
+    ports:
+      - "8181:80"
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_HTTPS: "false"
+    restart: always
+    #command: '-l debug'
+
+  api:
+    build: $PWD/api
+    ports:
+      - "8282:80"
+    depends_on:
+      - ldap
+    environment:
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_PASSWORD: ${LDAP_PASSWORD}
+      LDAP_HOST: ldap
+    extra_hosts:
+      - irods:$LOCALHOST
+    volumes:
+      - $PWD/api/src:/usr/local/src:ro
+    restart: always
+#   stdin_open: true
+#   tty: true
+#   command: bash
+    command: python /usr/local/src/services.py

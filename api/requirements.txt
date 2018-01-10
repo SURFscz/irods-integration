@@ -1,0 +1,5 @@
+tornado
+tornado-webservices
+python-ldap
+pyotp
+git+git://github.com/irods/python-irodsclient.git
