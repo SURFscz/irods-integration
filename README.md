@@ -1,4 +1,4 @@
-# SCZ YODA package
+# SCZ iRODS / YODA package
 
 ![alt text](schema.png)
 
