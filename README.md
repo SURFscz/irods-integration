@@ -1,6 +1,6 @@
 # SCZ YODA package
 
-![alt text](yoda.svg)
+![alt text](schema.png)
 
 please make ***.env*** file first. You can copy ***env.template*** for that.
 
